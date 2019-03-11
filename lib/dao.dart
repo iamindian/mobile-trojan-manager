@@ -22,7 +22,7 @@ class Dao{
     return list;
   }
   Future<List> findUser(String keyword) async{
-    Results results = await mysql.read('select username, quota from users where username like %keyword%');
+    Results results = await mysql.read("select username, quota from users where username like '%${keyword}%'");
     List list = new List();
     results.forEach((row){
        list.add(User(username:row[0], quota:row[1]));
