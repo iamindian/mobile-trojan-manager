@@ -59,9 +59,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Trojan Manager',
+      title: 'Mobile Trojan Manager',
       theme: ThemeData(primarySwatch: Colors.brown),
-      home: MyHomePage(title: 'Trojan Manager'),
+      home: MyHomePage(title: 'Mobile Trojan Manager'),
     );
   }
 }
@@ -348,47 +348,46 @@ class DelUserState extends State<DelUser> {
                     key: Key(item),
                     // We also need to provide a function that tells our app
                     // what to do after an item has been swiped away.
-                    onDismissed: (direction) {
+                    onDismissed: (direction) async {
                       // Remove the item from our data source.
                       setState(() {
                         last = users.removeAt(index);
                       });
-                      Future confirm() async {
-                        Completer c = Completer();
-                        // Then show a snackbar!
-                        Scaffold.of(context).showSnackBar(SnackBar(
-                            content: SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.05,
-                                width: MediaQuery.of(context).size.width,
-                                child: Row(children: [
-                                  Expanded(
-                                      child: Center(
-                                          child: Text("$item deleted",
-                                              style: TextStyle(
-                                                  fontWeight:
-                                                      FontWeight.bold)))),
-                                  Expanded(
-                                      child: Center(
-                                          child: FlatButton(
-                                    child: Text('Undo',
-                                        textAlign: TextAlign.right,
-                                        style: TextStyle(color: Colors.red)),
-                                    padding: EdgeInsets.only(left: 5.0),
-                                    onPressed: () {
-                                      setState(() {
-                                        users.add(last);
-                                        Scaffold.of(context)
-                                            .removeCurrentSnackBar();
-                                      });
-                                    },
-                                  )))
-                                ]))));
-                        c.complete(() {});
-                        c.completeError(() {});
-                        return c.future;
-                      }
-                      Future f = confirm();
+
+                      // Then show a snackbar!
+                      Scaffold.of(context).showSnackBar(SnackBar(
+                          content: SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.05,
+                              width: MediaQuery.of(context).size.width,
+                              child: Row(children: [
+                                Expanded(
+                                    child: Center(
+                                        child: Text("$item deleted",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold)))),
+                                Expanded(
+                                    child: Center(
+                                        child: FlatButton(
+                                  child: Text('Undo',
+                                      textAlign: TextAlign.right,
+                                      style: TextStyle(color: Colors.red)),
+                                  padding: EdgeInsets.only(left: 5.0),
+                                  onPressed: () {
+                                    setState(() {
+                                      users.add(last);
+                                      Scaffold.of(context)
+                                          .removeCurrentSnackBar();
+                                      
+                                    });
+                                  },
+                                )))
+                              ])))).closed.then((reason) async{
+                                  if(reason == SnackBarClosedReason.timeout){
+                                      Service service = StateContainer.of(context).service;
+                                      await service.delUser(last.username);
+                                  }
+                              });
+
                       
                     },
                     // Show a red background as the item is swiped away
