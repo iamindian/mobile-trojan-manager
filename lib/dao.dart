@@ -1,3 +1,8 @@
+import 'dart:typed_data';
+
+import 'package:convert/convert.dart';
+import 'package:pointycastle/api.dart';
+
 import 'mysql.dart';
 import 'dart:async';
 import 'package:sqljocky5/sqljocky.dart';
@@ -8,6 +13,12 @@ class Dao{
     mysql = new Mysql();
   }
   Future<int> addUser(List<List> values) async{
+    Digest sha224 = new Digest('SHA-224');
+    values.forEach((row){
+      String str = row[0]+':'+row[1];
+      row[1] = hex.encode(sha224.process(Uint8List.fromList(str.codeUnits)));
+      print(row[1]);
+    });
     return await mysql.insert('insert into users (username, password, quota) values(?, ?, ?);', values);
   }
   Future<int> delUser(String username) async{
