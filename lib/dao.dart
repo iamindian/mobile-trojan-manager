@@ -8,10 +8,10 @@ class Dao{
     mysql = new Mysql();
   }
   Future<int> addUser(List<List> values) async{
-    return await mysql.insert('insert into users (username, password, quota) values(?, ?, ?)', values);
+    return await mysql.insert('insert into users (username, password, quota) values(?, ?, ?);', values);
   }
   Future<int> delUser(String username) async{
-    return await mysql.execute('delete from users where username=' + username);
+    return await mysql.execute("delete from users where username='" + username + "';");
   }
   Future<List> lsUser() async{
     Results results = await mysql.read('select username, quota from users;');
@@ -22,7 +22,7 @@ class Dao{
     return list;
   }
   Future<List> findUser(String keyword) async{
-    Results results = await mysql.read('select username, quota from users where username like %keyword%');
+    Results results = await mysql.read("select username, quota from users where username like '%${keyword}%'");
     List list = new List();
     results.forEach((row){
        list.add(User(username:row[0], quota:row[1]));

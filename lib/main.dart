@@ -1,48 +1,45 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:trojan_mobile_manager/service.dart';
-import 'package:trojan_mobile_manager/user.dart';
+import 'package:flutter_search_bar/flutter_search_bar.dart';
+import 'service.dart';
+import 'dart:developer';
+import 'dart:async';
 
-void main() => runApp(StateContainer(child:new MyApp()));
+void main() => runApp(StateContainer(child: new MyApp()));
 
-class StateContainer extends StatefulWidget{
+class StateContainer extends StatefulWidget {
   final Widget child;
-  StateContainer({
-    @required this.child
-  });
+  StateContainer({@required this.child});
   // This is the secret sauce. Write your own 'of' method that will behave
   // Exactly like MediaQuery.of and Theme.of
   // It basically says 'get the data from the widget of this type.
   static StateContainerState of(BuildContext context) {
     return (context.inheritFromWidgetOfExactType(_InheritedStateContainer)
-            as _InheritedStateContainer).data;
+            as _InheritedStateContainer)
+        .data;
   }
+
   @override
   StateContainerState createState() {
     return StateContainerState();
   }
-  
 }
 
-class StateContainerState extends State<StateContainer>{
+class StateContainerState extends State<StateContainer> {
   Service service;
-  StateContainerState(){
-      service = new Service();
+  StateContainerState() {
+    service = new Service();
   }
   @override
   Widget build(BuildContext context) {
-    return  _InheritedStateContainer(
-      data:this,
-      child:widget.child
-    );
+    return _InheritedStateContainer(data: this, child: widget.child);
   }
 }
 
 class _InheritedStateContainer extends InheritedWidget {
-   // Data is your entire state. In our case just 'service' 
+  // Data is your entire state. In our case just 'service'
   final StateContainerState data;
-   
+
   // You must pass through a child and your state.
   _InheritedStateContainer({
     Key key,
@@ -62,9 +59,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Trojan Manager',
+      title: 'Mobile Trojan Manager',
       theme: ThemeData(primarySwatch: Colors.brown),
-      home: MyHomePage(title: 'Trojan Manager'),
+      home: MyHomePage(title: 'Mobile Trojan Manager'),
     );
   }
 }
@@ -88,18 +85,17 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         drawer: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.6,
+          width: MediaQuery.of(context).size.width * 0.4,
           child: Drawer(
               child: ListView(
             shrinkWrap: true,
             padding: const EdgeInsets.fromLTRB(10.0, 75.0, 10.0, 10.0),
             children: [
-              RaisedButton(
+              FlatButton(
                 child: Text('Create User'),
                 onPressed: () {
                   // Navigate to add user when tapped.
@@ -109,7 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   );
                 },
               ),
-              RaisedButton(
+              FlatButton(
                   child: Text('Delete User'),
                   onPressed: () {
                     // Navigate to add user when tapped.
@@ -118,7 +114,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       MaterialPageRoute(builder: (context) => DelUser()),
                     );
                   }),
-              RaisedButton(
+              FlatButton(
                   child: Text('DB Setting'),
                   onPressed: () {
                     // Navigate to add user when tapped.
@@ -146,12 +142,11 @@ class AddUser extends StatefulWidget {
 
 class AddUserState extends State<AddUser> {
   bool isLoading = false;
-  TextEditingController usernameCtl =  TextEditingController();
-  TextEditingController passwordCtl =  TextEditingController(); 
-  TextEditingController quotaCtl =  TextEditingController(); 
+  TextEditingController usernameCtl = TextEditingController();
+  TextEditingController passwordCtl = TextEditingController();
+  TextEditingController quotaCtl = TextEditingController();
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
         floatingActionButton: Builder(
             builder: (context) => Container(
@@ -162,17 +157,19 @@ class AddUserState extends State<AddUser> {
                       isLoading = true;
                     });
                     Service service = StateContainer.of(context).service;
-                    int added = await service.addUser(usernameCtl.text,passwordCtl.text, int.parse(quotaCtl.text));
+                    int added = await service.addUser(usernameCtl.text,
+                        passwordCtl.text, int.parse(quotaCtl.text));
                     setState(() {
                       isLoading = false;
                     });
                     Scaffold.of(context).showSnackBar(SnackBar(
-                          duration: new Duration(seconds: 2),
-                          content: added==0? Text('User added successfully.',
-                              textAlign: TextAlign.center):Text('User added unsuccessfully.',
+                      duration: new Duration(seconds: 2),
+                      content: added == 0
+                          ? Text('User added successfully.',
+                              textAlign: TextAlign.center)
+                          : Text('User added unsuccessfully.',
                               textAlign: TextAlign.center),
                     ));
-                    
                   },
                   child: Icon(Icons.add),
                 ))),
@@ -192,7 +189,7 @@ class AddUserState extends State<AddUser> {
                     children: [
                       Padding(
                         child: TextFormField(
-                          controller:usernameCtl,
+                          controller: usernameCtl,
                           decoration: const InputDecoration(
                             icon: Icon(Icons.account_box),
                             hintText: 'Jack chen',
@@ -210,7 +207,7 @@ class AddUserState extends State<AddUser> {
                       ),
                       Padding(
                         child: TextFormField(
-                          controller:passwordCtl,
+                          controller: passwordCtl,
                           decoration: const InputDecoration(
                             icon: Icon(Icons.lock),
                             hintText: 'abcde',
@@ -228,7 +225,7 @@ class AddUserState extends State<AddUser> {
                       ),
                       Padding(
                         child: TextFormField(
-                          controller:quotaCtl,
+                          controller: quotaCtl,
                           decoration: const InputDecoration(
                             icon: Icon(Icons.data_usage),
                             hintText: 'abcde',
@@ -260,8 +257,20 @@ class DelUserState extends State<DelUser> {
   String username;
   bool isLoading = false;
   List selectedUsers = List.from([]);
-  List<User> users = User.getUsers();
-  onSelectedRow(selected, user) {
+  List users = [];
+  dynamic last;
+  TextEditingController kwCtl = TextEditingController();
+  findUser(keyword) async {
+    if (keyword == '') return;
+    Service service = StateContainer.of(context).service;
+    List list = await service.findUser(keyword);
+    setState(() {
+      users = list;
+    });
+  }
+
+  SearchBar searchBar;
+  /* onSelectedRow(selected, user) {
     setState(() {
       if (!selectedUsers.contains(user) && selected) {
         selectedUsers.add(user);
@@ -269,59 +278,127 @@ class DelUserState extends State<DelUser> {
         selectedUsers.remove(user);
       }
     });
+  } */
+
+  AppBar buildAppBar(BuildContext context) {
+    return new AppBar(
+        title: new Text('Del User'),
+        actions: [searchBar.getSearchAction(context)]);
   }
 
-  List<DataRow> getRows() {
-    return users
-        .map((user) => DataRow(
-                selected: selectedUsers.contains(user),
-                onSelectChanged: (b) {
-                  onSelectedRow(b, user);
-                },
-                cells: [
-                  DataCell(Text(user.username)),
-                  DataCell(Text(user.quota.toString())),
-                ]))
-        .toList();
+  DelUserState() {
+    searchBar = SearchBar(
+        controller: kwCtl,
+        showClearButton: true,
+        clearOnSubmit: false,
+        inBar: false,
+        setState: setState,
+        onSubmitted: findUser,
+        buildDefaultAppBar: buildAppBar);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: Builder(
-          builder: (context) => Container(
-                  child: FloatingActionButton(
-                backgroundColor: Colors.amber,
-                onPressed: () {
-                  setState(() {
-                    isLoading = true;
-                  });
-                  new Timer(new Duration(seconds: 2), () {
+        /* bottomNavigationBar: BottomAppBar(
+        color: Colors.white,
+        child: SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height * 0.06,
+            child: Center(child: Text('bottom app bar'))),
+      ), */
+        /* floatingActionButton: Builder(
+            builder: (context) => Container(
+                    child: FloatingActionButton(
+                  backgroundColor: Colors.amber,
+                  onPressed: () {
                     setState(() {
-                      isLoading = false;
-                      Scaffold.of(context).showSnackBar(SnackBar(
-                        duration: new Duration(seconds: 2),
-                        content: Text('Users deleted successfully.',
-                            textAlign: TextAlign.center),
-                      ));
+                      isLoading = true;
                     });
-                  });
+                    new Timer(new Duration(seconds: 2), () {
+                      setState(() {
+                        isLoading = false;
+                        Scaffold.of(context).showSnackBar(SnackBar(
+                          duration: new Duration(seconds: 2),
+                          content: Text('Users deleted successfully.',
+                              textAlign: TextAlign.center),
+                        ));
+                      });
+                    });
+                  },
+                  child: Icon(Icons.delete),
+                ))), */
+        appBar: searchBar.build(context),
+        body: Container(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            child: Center(
+                child: RefreshIndicator(
+              onRefresh: () async {
+                List list = await findUser(kwCtl.text);
+                print(list.length);
+              },
+              child: ListView.builder(
+                itemCount: users.length,
+                itemBuilder: (context, index) {
+                  final item = users[index].username;
+                  return Dismissible(
+                    // Each Dismissible must contain a Key. Keys allow Flutter to
+                    // uniquely identify Widgets.
+                    key: Key(item),
+                    // We also need to provide a function that tells our app
+                    // what to do after an item has been swiped away.
+                    onDismissed: (direction) async {
+                      // Remove the item from our data source.
+                      setState(() {
+                        last = users.removeAt(index);
+                      });
+
+                      // Then show a snackbar!
+                      Scaffold.of(context).showSnackBar(SnackBar(
+                          content: SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.05,
+                              width: MediaQuery.of(context).size.width,
+                              child: Row(children: [
+                                Expanded(
+                                    child: Center(
+                                        child: Text("$item deleted",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold)))),
+                                Expanded(
+                                    child: Center(
+                                        child: FlatButton(
+                                  child: Text('Undo',
+                                      textAlign: TextAlign.right,
+                                      style: TextStyle(color: Colors.red)),
+                                  padding: EdgeInsets.only(left: 5.0),
+                                  onPressed: () {
+                                    setState(() {
+                                      users.add(last);
+                                      Scaffold.of(context)
+                                          .removeCurrentSnackBar();
+                                      
+                                    });
+                                  },
+                                )))
+                              ])))).closed.then((reason) async{
+                                  if(reason == SnackBarClosedReason.timeout){
+                                      Service service = StateContainer.of(context).service;
+                                      await service.delUser(last.username);
+                                  }
+                              });
+
+                      
+                    },
+                    // Show a red background as the item is swiped away
+                    background: Container(color: Colors.red),
+                    child: ListTile(
+                        title: Text('$item',
+                            style: TextStyle(fontWeight: FontWeight.bold))),
+                  );
                 },
-                child: Icon(Icons.delete),
-              ))),
-      appBar: AppBar(
-        title: Text('Del User'),
-      ),
-      body: Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          child: DataTable(
-              rows: getRows(),
-              columns: List.from([
-                DataColumn(label: Text('Username')),
-                DataColumn(label: Text('Quota'))
-              ]))),
-    );
+              ),
+            ))));
   }
 }
 
@@ -334,50 +411,50 @@ class Connect extends StatefulWidget {
 
 class ConnectState extends State<Connect> {
   int connected = 0;
-  TextEditingController hostCtl =TextEditingController();
-  TextEditingController usernameCtl =TextEditingController();
-  TextEditingController passwordCtl =TextEditingController();
-  TextEditingController databaseCtl =TextEditingController();
-  TextEditingController portCtl =TextEditingController();
-  
+  TextEditingController hostCtl = TextEditingController();
+  TextEditingController usernameCtl = TextEditingController();
+  TextEditingController passwordCtl = TextEditingController();
+  TextEditingController databaseCtl = TextEditingController();
+  TextEditingController portCtl = TextEditingController();
+
   Form form;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         floatingActionButton: FloatingActionButton(
-          backgroundColor: connected==1 ? Colors.amber:Colors.green,
+          backgroundColor: connected == 1 ? Colors.amber : Colors.green,
           onPressed: () async {
             Service service = StateContainer.of(context).service;
             int result;
-            switch(connected){
+            switch (connected) {
               case 0:
                 result = await service.connect(
-                hostCtl.text, 
-                int.parse(portCtl.text), 
-                usernameCtl.text, 
-                passwordCtl.text,
-                databaseCtl.text);
+                    hostCtl.text,
+                    int.parse(portCtl.text),
+                    usernameCtl.text,
+                    passwordCtl.text,
+                    databaseCtl.text);
                 setState(() {
-                    if(result==0){
-                      connected = 1;
-                    }
+                  if (result == 0) {
+                    connected = 1;
+                  }
                 });
                 break;
               case 1:
                 await service.close();
                 setState(() {
-                      connected = 0;
+                  connected = 0;
                 });
                 break;
             }
-            
           },
-          child: connected==1 ? Icon(Icons.pause) : Icon(Icons.play_arrow),
+          child: connected == 1 ? Icon(Icons.pause) : Icon(Icons.play_arrow),
         ),
         appBar: AppBar(
           title: Text('Connect'),
         ),
-        body:form=Form(child: Column(
+        body: form = Form(
+            child: Column(
           children: <Widget>[
             Padding(
               child: TextFormField(
@@ -470,9 +547,7 @@ class ConnectState extends State<Connect> {
                 ),
                 padding: EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0))
           ],
-        )
-        )
-    );
+        )));
   }
 }
 
