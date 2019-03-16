@@ -23,7 +23,8 @@ dependencies:
   sqljocky5: ^2.2.1
   test: ^1.3.0
   flutter_search_bar: ^2.0.7
-  
+  #sqljocky5:
+    #git: git://github.com/iamindian/sqljocky5.git
 
 dev_dependencies:
   flutter_test:
