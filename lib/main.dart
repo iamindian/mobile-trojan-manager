@@ -100,8 +100,10 @@ class AddUserState extends State<AddUser> {
   TextEditingController usernameCtl = TextEditingController();
   TextEditingController passwordCtl = TextEditingController();
   TextEditingController quotaCtl = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
         floatingActionButton: Builder(
             builder: (context) => Container(
@@ -109,6 +111,11 @@ class AddUserState extends State<AddUser> {
                   heroTag: 'addBtn',
                   backgroundColor: Colors.amber,
                   onPressed: () async {
+                    final FormState form = _formKey.currentState;
+                    if(!form.validate()){
+                          return;
+                    }
+                        
                     setState(() {
                       isLoading = true;
                     });
@@ -141,10 +148,13 @@ class AddUserState extends State<AddUser> {
                 ? Center(
                     child: CircularProgressIndicator(),
                   )
-                : new Column(
+                : Form(
+                  key: _formKey,
+                  child:Column(
                     children: [
                       Padding(
                         child: TextFormField(
+                          autovalidate: true,
                           controller: usernameCtl,
                           decoration: const InputDecoration(
                             icon: Icon(Icons.account_box),
@@ -156,7 +166,9 @@ class AddUserState extends State<AddUser> {
                             // code when the user saves the form.
                           },
                           validator: (String value) {
-                            return null;
+                            RegExp re =RegExp(r"^\w+$",multiLine: true);
+                            print("username validation:" + re.hasMatch(value).toString());
+                            return re.hasMatch(value)?null:'underscore and alphanumeric are allowed';
                           },
                         ),
                         padding: EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
@@ -199,7 +211,7 @@ class AddUserState extends State<AddUser> {
                         padding: EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
                       )
                     ],
-                  )));
+                  ))));
   }
 }
 
@@ -335,7 +347,18 @@ class LsUserState extends State<LsUser> {
                       });
                     },
                     // Show a red background as the item is swiped away
-                    background: Container(color: Colors.red),
+                    background: Container(
+                      color:Colors.red,
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child:Text(
+                          'delete',
+                          style:TextStyle(
+                            color: Colors.yellow
+                          ))
+                      ),
+
+                    ),
                     child: ListTile(
                         title: Text('$item',
                             style: TextStyle(fontWeight: FontWeight.bold))),
